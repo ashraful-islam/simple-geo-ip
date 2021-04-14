@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>My GEO-IP</title>
+  <style>
+    html, body, p, span, strong {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #ccc;
+      color: #111110;
+      font-family: 'DM Mono', 'Consolas', 'Inconsolata', monospace;
+      font-size: 16px;
+      line-height: 1.2em;
+    }
+
+    .container {
+      margin: 0 auto;
+      max-width: 320px;
+      min-width: 320px;
+      background-color: #f3f3f3;
+      padding: 2em;
+      text-align: left;
+      margin-top: 25vh;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .value {
+      font-weight: bold;
+    }
+
+    #error {
+      color: #fff;
+      background-color: rgba(200,0,0,0.8);
+      height: 2.2em;
+      text-align: center;
+      padding: 0.5em 0.8em;
+      border-radius: 0.5em;
+    }
+    .hide {
+      display: none;
+    }
+
+    .breath {
+      animation: breath 4s infinite;
+    }
+
+    @keyframes breath {
+      0% { opacity: 0; }
+      50% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p id="intro" class="breath">Loading ...</p>
+    <p class="hide" id="error">Error fetching data d[x.x]b </p>
+    <table id="data-table" class="hide">
+      <tbody>
+        <tr>
+          <td>IP</td>
+          <td id="ip-value" class="value">...</td>
+        </tr>
+       <tr>
+         <td>City</td>
+         <td id="city-value" class="value">...</td>
+        </tr>
+        <tr>
+          <td>Country</td>
+          <td id="country-value" class="value">...</td>
+        </tr>
+        <tr>
+          <td>Continent</td>
+          <td id="continent-value" class="value">...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <script>
+    function getEl(selector) {
+      const el = document.querySelector(selector);
+      if (el == null) console.info('bad query',selector);
+      return el;
+    }
+
+    function hideEl(selector) {
+      const el = getEl(selector);
+      if (el == null) return;
+      el.classList.add('hide');
+    }
+
+    function showEl(selector) {
+      const el = getEl(selector);
+      if (el == null) return;
+      el.classList.remove('hide');
+    }
+
+    function logError(err) {
+        console.error(err.message);
+      hideEl('#intro');
+        showEl('#error');
+    }
+
+    function setTxt(selector, content) {
+      const el = getEl(selector);
+      if (el == null) return;
+      el.innerText = content.toUpperCase().trim();
+    }
+
+    function displayData(r) {
+      setTxt('#city-value', r.city);
+      setTxt('#country-value', r.country);
+      setTxt('#continent-value', r.continent);
+      setTxt('#ip-value', r.ip);
+      hideEl('#intro');
+      showEl('#data-table');
+    }
+
+    function fetchGeolocation() {
+
+      // fetch geolocation info
+      fetch('https://www.iplocate.io/api/lookup/')
+      .then(r => r.json())
+      .then(displayData)
+      .catch(logError);
+      document.removeEventListener('DOMContentLoaded',fetchGeolocation);
+    }
+    document.addEventListener('DOMContentLoaded',fetchGeolocation);
+  </script>
+</body>
+</html>
